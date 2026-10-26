@@ -121,3 +121,9 @@ impl std::fmt::Display for ErrorCode {
         }
     }
 }
+
+impl From<ErrorCode> for anchor_lang::error::Error {
+ fn from(code:ErrorCode)->Self {
+  anchor_lang::error::AnchorError {error_name:code.name(),error_code_number:code.into(),error_msg:code.to_string(),error_origin:None,compared_values:None}.into()
+ }
+}

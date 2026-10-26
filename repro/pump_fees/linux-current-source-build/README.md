@@ -1,5 +1,9 @@
 # Independent Linux x86_64 Fees v1.44 builds
 
+Builds on the upstream packages `repro/pump_fees/linux-v144-sysroot-provenance`,
+`repro/pump_fees/linux-v144-hosted-comparison` and
+`repro/pump_fees/linux-darwin-v144-attribution`.
+
 Two genuine offline `cargo build-sbf --tools-version v1.44` builds with the
 official Linux platform-tools v1.44 archive
 (SHA-256 `6719b889d60677a8a2fcf4c82f68441a1afe0ab093edd2efe9f84a67a808b3e9`)
@@ -19,15 +23,27 @@ and CLI 2.1.21 on a Linux x86_64 host:
    candidate `2387f8139a13918a…` only in sysroot path strings
    (`/home/runner/...` versus `/Users/runner/...`) and dependent stack-frame
    layout deltas. Same 26 source inputs hash to the same values.
-3. The captured original `4f2955d0…` embeds `/home/runner/work/platform-tools`
-   paths (7 occurrences, zero `/Users/runner`). The original was produced on a
-   Linux CI runner. The retained macOS `2387` candidate can never be byte-equal
-   to it while those literals differ. The Linux v1.44 route, not the Darwin
-   candidate, is the byte-identity route for Fees.
+3. The raw comparison of the current-source Linux build `6c44d9f2…` against the
+   frozen hosted-candidate build `7e823e60…` and the captured original
+   `4f2955d0…` is recorded in `raw-byte-comparison.json`: 420,129 differing
+   shared positions (first at 24, length delta +94,816) versus the frozen
+   candidate; 460,758 differing shared positions (first at 24, length delta
+   −85,144) versus the original. The upstream
+   `linux-v144-sysroot-provenance` package already establishes that the
+   original embeds `/home/runner/work/platform-tools` sysroot paths from the
+   official Linux v1.44 archive; the frozen-source build's byte equality with
+   the hosted candidate independently confirms determinism on a second Linux
+   host.
 4. Whole-file equality remains false for every local candidate versus the
-   captured original; 460,758 common-extent positions differ for the current
-   Linux build. No source patch, binary patch, padding or normalization was
-   applied; all builds were clean and offline after initial locked fetch.
+   captured original. No source patch, binary patch, padding or normalization
+   was applied; all builds were clean and offline after initial locked fetch.
+
+## Verify
+
+Run `python3 -B verify.py` for portable manifest/candidate/raw-comparison
+checks. Add `--repo /path/to/pumpfun-source` to re-read the captured original
+`evidence/original/pump_fees/deployed.so` and repeat all raw comparisons from
+disk. Neither mode builds, executes the target or contacts a network.
 
 ## Reproduce
 

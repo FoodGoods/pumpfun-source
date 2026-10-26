@@ -34,11 +34,20 @@ mod anchor_framework {
      * The initial constructor still has to match before replacement.
      */
     #[program]
-    pub mod relay_anchor_idl_reconstruction_probe {}
+    pub mod relay_anchor_idl_reconstruction_probe {
+        use super::*;
+        pub fn upsert_mint_whitelist_v1(ctx: Context<UpsertMintWhitelistV1>, mints: Vec<Pubkey>) -> Result<()> {
+            check_relayer(&ctx.accounts.signer)?;
+            upsert_whitelist(&mut ctx.accounts.mint_whitelist, mints, ctx.bumps.mint_whitelist)
+        }
+    }
+    include!("state/v1/mint_whitelist.rs");
+    include!("instructions/v1/relayer_only/upsert_mint_whitelist.rs");
 }
+pub(crate) use anchor_framework::__client_accounts_upsert_mint_whitelist_v1;
 anchor_lang::solana_program::entrypoint!(process_instruction);
 fn process_instruction<'info>(program_id: &solana_program::pubkey::Pubkey, accounts: &'info [solana_program::account_info::AccountInfo<'info>], data: &[u8]) -> solana_program::entrypoint::ProgramResult {
-    let reserved = data.starts_with(&[64,244,188,120,167,233,105,10]) || data.starts_with(&[228,69,165,46,81,203,154,29]);
+    let reserved = data.starts_with(&[209,133,253,12,80,9,231,128]) || data.starts_with(&[64,244,188,120,167,233,105,10]) || data.starts_with(&[228,69,165,46,81,203,154,29]);
     if reserved || data.len() < 8 || *program_id != ID {
         anchor_framework::entry(program_id, accounts, data)
     } else {

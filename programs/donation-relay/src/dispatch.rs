@@ -75,7 +75,6 @@ pub fn dispatch<R:crate::idl_runtime::IdlRuntime,C:Admission<R>>(
  let raw_args=&data[8..];
  // Original169 routes to eleven distinct business wrappers178..188.
  match selector {
-  [120, 217, 57, 241, 135, 104, 139, 184]=>wrap_donate_pubkey_config_id_with_payer_v1(rt,contexts,program,accounts,raw_args),
   [121, 160, 15, 44, 219, 43, 134, 7]=>wrap_donate_native_v1(rt,contexts,program,accounts,raw_args),
   [192, 254, 132, 16, 208, 43, 154, 82]=>wrap_donate_native_pubkey_config_id_v1(rt,contexts,program,accounts,raw_args),
   [171, 28, 54, 214, 140, 137, 101, 90]=>wrap_close_donation_epoch_v1(rt,contexts,program,accounts,raw_args),
@@ -94,28 +93,7 @@ pub fn dispatch<R:crate::idl_runtime::IdlRuntime,C:Admission<R>>(
 
 
 // Instruction-specific wrapper: log, decode, admission, body, event/return, exit.
-fn wrap_donate_pubkey_config_id_with_payer_v1<R:crate::idl_runtime::IdlRuntime,C:Admission<R>>(
- rt:&mut R,contexts:&mut C,program:Key,accounts:&[Account],raw_args:&[u8]
-)->D<()> {
- rt.log_instruction("Instruction: DonatePubkeyConfigIdWithPayerV1");
- let instruction=codec::decode_arguments("donate_pubkey_config_id_with_payer_v1",raw_args).map_err(Failure::Body)?;
- let codec::Instruction::Donation(kind,args)=instruction else {unreachable!("fixed decoder selection")};
-   let mut frame=contexts.donation(rt,&program,accounts,raw_args,kind,&args)?;
-   let event={let mut c=frame.body();match kind {
-    DonationVariant::TokenBytes=>body::donate_v1(rt,&mut c,args),
-    DonationVariant::TokenPubkey=>body::donate_pubkey_config_id_v1(rt,&mut c,args),
-    DonationVariant::TokenPubkeyWithPayer=>body::donate_pubkey_config_id_with_payer_v1(rt,&mut c,args),
-    DonationVariant::NativeBytes=>body::donate_native_v1(rt,&mut c,args),
-    DonationVariant::NativePubkey=>body::donate_native_pubkey_config_id_v1(rt,&mut c,args),
-   }}.map_err(Failure::Body)?;
-   emit_and_return(rt,&event,frame.event())?;
-   let c=frame.exit();
-   match kind {
-    DonationVariant::TokenBytes|DonationVariant::TokenPubkey=>exit::account_exit125(rt,&program,&c),
-    DonationVariant::NativeBytes|DonationVariant::NativePubkey=>exit::account_exit130(rt,&program,&c),
-    DonationVariant::TokenPubkeyWithPayer=>exit::account_exit141(rt,&program,&c),
-   }.map_err(Failure::Exit)
-}
+
 
 // Instruction-specific wrapper: log, decode, admission, body, event/return, exit.
 fn wrap_donate_native_v1<R:crate::idl_runtime::IdlRuntime,C:Admission<R>>(

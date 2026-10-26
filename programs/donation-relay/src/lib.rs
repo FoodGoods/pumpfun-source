@@ -1,4 +1,4 @@
-//! Uncompiled natural source proposal. Runtime and diagnostic boundaries explicit.
+//! Reconstructed Relay Rust; whole captured-byte identity remains unproven.
 pub mod model; pub mod codec; pub mod runtime; pub mod arithmetic; pub mod handlers;
 pub mod mint_policy; pub mod generated_exit; pub mod dispatch; pub mod dispatch_interfaces;
 pub mod admission; pub mod frames;
@@ -15,3 +15,33 @@ pub fn require(ok:bool,code:u32)->R<()> {if ok {Ok(())} else {Err(Error::Code(co
 pub fn overflow()->Error {Error::Code(6008)}
 
 pub mod business_error_codes;
+
+anchor_lang::declare_id!("RLAYHr9TRFcKB2ubYQhspcnXiaGpaVzNQvHytt47RZu");
+mod anchor_framework {
+    use anchor_lang::prelude::*;
+    use crate::ID;
+    /*
+     * The captured generated IDL error records lib.rs line 36.
+     * Its filename is programs/contracts/src/lib.rs (29 bytes).
+     * Anchor expands the program macro into those source values.
+     * Preserve the observed macro coordinate in this reconstruction.
+     * The historical source text preceding it remains unknown.
+     * These comments document the coordinate, not historical text.
+     * Build this root crate with the documented source-path remap.
+     * Dependency source paths retain their own SDK remapping.
+     * No captured machine instructions enter the Rust build.
+     * Runtime account decorators replace this source origin later.
+     * The initial constructor still has to match before replacement.
+     */
+    #[program]
+    pub mod relay_anchor_idl_reconstruction_probe {}
+}
+anchor_lang::solana_program::entrypoint!(process_instruction);
+fn process_instruction<'info>(program_id: &solana_program::pubkey::Pubkey, accounts: &'info [solana_program::account_info::AccountInfo<'info>], data: &[u8]) -> solana_program::entrypoint::ProgramResult {
+    let reserved = data.starts_with(&[64,244,188,120,167,233,105,10]) || data.starts_with(&[228,69,165,46,81,203,154,29]);
+    if reserved || data.len() < 8 || *program_id != ID {
+        anchor_framework::entry(program_id, accounts, data)
+    } else {
+        crate::entrypoint::process_instruction(program_id, accounts, data)
+    }
+}

@@ -73,12 +73,6 @@ pub fn dispatch<R:crate::idl_runtime::IdlRuntime,C:Admission<R>>(
  if data.len()<8 {return Err(framework(101));}
  let selector:[u8;8]=data[..8].try_into().unwrap();
  let raw_args=&data[8..];
- if selector==IDL_SELECTOR {
-  // Concrete reserved-IDL prefix decoder, ordered admission, bodies and exits.
-  // Its rich metadata is preserved separately; report_error must handle Idl.
-  return crate::idl::dispatch170(rt,&program,accounts,raw_args).map_err(Failure::Idl);
- }
- if selector==EVENT_SELECTOR {return event_recursion(rt,&program,accounts);}
  // Original169 routes to eleven distinct business wrappers178..188.
  match selector {
   [136, 8, 102, 156, 214, 4, 17, 171]=>wrap_donate_v1(rt,contexts,program,accounts,raw_args),

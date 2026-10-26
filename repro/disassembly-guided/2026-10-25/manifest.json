@@ -1,5 +1,5 @@
 {
-  "NEXT.md": "50562ba7d1a471a6f74db0f915a58dacf384ca1198a15d05097b78539c8325a3",
+  "NEXT.md": "50bf157d10a27495f0b9f48013f8e37e56a1a0a02fbb1e253357aeacc2020159",
   "README.md": "b34d3199704661effa96c28d5fc6d15e13048b0ace2bcc6f6c95a384c38622f9",
   "assembly/associated_token.s.gz": "e413dc7ece1864317a4f2f79f2a62b6ec53253736230cc2a8b1d8ceb7b047207",
   "assembly/donation_relay.s.gz": "57eac41cfe3c835f7d8b86ef96f7822de78c526fa4c6e9b9ce0f8324b054ffce",
@@ -16,6 +16,7 @@
   "inventory/donation_relay.json.gz": "8dbc9dbba5b07642daf5439a0bfb3f64778847e82793d43d7f35609c85075404",
   "inventory/donation_relay.s.gz": "df9947304a0c52442276d2be9e2fbc766504595f0ed236268500502bf7f3403a",
   "inventory/donation_relay.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "inventory/manifest.json": "3996e32c6fe0dd04d9ea15ffbeb300d6804cf3374cce0571fd875d78d78cd715",
   "inventory/mayhem.json.gz": "a83382cec0ec514ffd61e853063235c4caa6db361e37ca14a97b30397a8f1643",
   "inventory/mayhem.s.gz": "37977bb894817deebf9329d147cbf2a4a15a57b2734cfdf630ae3409513ade5c",
   "inventory/mayhem.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -48,6 +49,5 @@
   "roundtrip-elfs/spl_token_2022.so": "64a10901d7cb5fbd1e72eba8555dd28f20dd42e6ffa7440c32d533f3406777f4",
   "roundtrip-elfs/token_metadata.so": "204a80cd42c91210adc9e96027b45a3aa79a36dca8ce64cdd089e4d4c973b9d7",
   "roundtrip-report.json": "5cc2c6e41cdfc4248b6290aa2ad63923b1fe4036641c25c9d0028b934da2241f",
-  "verify.py": "3d4343bc8c8c54a434c16df60633b23fc889bac47bc83d4a684da5cc0274d2a8",
-  "inventory/manifest.json": "3996e32c6fe0dd04d9ea15ffbeb300d6804cf3374cce0571fd875d78d78cd715"
+  "verify.py": "3d4343bc8c8c54a434c16df60633b23fc889bac47bc83d4a684da5cc0274d2a8"
 }

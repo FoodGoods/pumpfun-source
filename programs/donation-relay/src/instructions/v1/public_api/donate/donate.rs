@@ -22,16 +22,14 @@ pub struct DonateV1<'info> {
     #[account(init_if_needed, payer = from, associated_token::mint = mint, associated_token::authority = debouncer, associated_token::token_program = token_program)]
     pub debouncer_token_account: InterfaceAccount<'info,TokenAccount>,
     #[account(mut, mint::token_program = token_program)]
-    pub mint: InterfaceAccount<'info,Mint>,
+    pub mint: Box<InterfaceAccount<'info,Mint>>,
     #[account(mut, associated_token::mint = mint, associated_token::authority = from, associated_token::token_program = token_program)]
     pub from_token_account: InterfaceAccount<'info,TokenAccount>,
     #[account(mut)]
     pub from: Signer<'info>,
     #[account(seeds = [b"mint_whitelist_v1"], bump = mint_whitelist.bump)]
     pub mint_whitelist: Account<'info,MintWhitelistV1>,
-    #[account(address = anchor_lang::solana_program::pubkey!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"))]
     pub associated_token_program: Program<'info,AssociatedToken>,
     pub token_program: Interface<'info,TokenInterface>,
-    #[account(address = anchor_lang::solana_program::pubkey!("11111111111111111111111111111111"))]
     pub system_program: Program<'info,System>,
 }

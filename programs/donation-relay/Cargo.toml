@@ -9,6 +9,7 @@ name = "donation_relay_source_proposal"
 crate-type = ["cdylib", "lib"]
 
 [dependencies]
+anchor-spl = { version = "=0.31.1", default-features = false, features = ["associated_token", "token", "token_2022", "token_2022_extensions"] }
 anchor-lang = { version = "=0.31.1", features = ["event-cpi", "init-if-needed"] }
 indexmap = "=2.11.4"
 borsh = "=0.10.4"

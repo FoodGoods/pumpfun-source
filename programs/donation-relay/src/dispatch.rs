@@ -81,7 +81,6 @@ pub fn dispatch<R:crate::idl_runtime::IdlRuntime,C:Admission<R>>(
   [121, 160, 15, 44, 219, 43, 134, 7]=>wrap_donate_native_v1(rt,contexts,program,accounts,raw_args),
   [192, 254, 132, 16, 208, 43, 154, 82]=>wrap_donate_native_pubkey_config_id_v1(rt,contexts,program,accounts,raw_args),
   [171, 28, 54, 214, 140, 137, 101, 90]=>wrap_close_donation_epoch_v1(rt,contexts,program,accounts,raw_args),
-  [209, 133, 253, 12, 80, 9, 231, 128]=>wrap_upsert_mint_whitelist_v1(rt,contexts,program,accounts,raw_args),
   [204, 159, 132, 117, 132, 86, 223, 73]=>wrap_just_swap_v1(rt,contexts,program,accounts,raw_args),
   [218, 85, 237, 178, 24, 174, 102, 41]=>wrap_swap_then_distribute_v1(rt,contexts,program,accounts,raw_args),
   [210, 176, 49, 190, 147, 105, 115, 119]=>wrap_distribute_after_just_swapping_v1(rt,contexts,program,accounts,raw_args),
@@ -224,17 +223,7 @@ fn wrap_close_donation_epoch_v1<R:crate::idl_runtime::IdlRuntime,C:Admission<R>>
 }
 
 // Instruction-specific wrapper: log, decode, admission, body, event/return, exit.
-fn wrap_upsert_mint_whitelist_v1<R:crate::idl_runtime::IdlRuntime,C:Admission<R>>(
- rt:&mut R,contexts:&mut C,program:Key,accounts:&[Account],raw_args:&[u8]
-)->D<()> {
- rt.log_instruction("Instruction: UpsertMintWhitelistV1");
- let instruction=codec::decode_arguments("upsert_mint_whitelist_v1",raw_args).map_err(Failure::Body)?;
- let codec::Instruction::Whitelist(mints)=instruction else {unreachable!("fixed decoder selection")};
-   let mut frame=contexts.whitelist(rt,&program,accounts,raw_args,&mints)?;
-   {let c=frame.body();body::upsert_mint_whitelist_v1(c.signer,c.state,c.canonical_bump,mints)}.map_err(Failure::Body)?;
-   // Original188 has no event adapter or set_return_data, even with prior data.
-   exit::account_exit158(rt,&program,&frame.exit()).map_err(Failure::Exit)
-}
+
 
 // Instruction-specific wrapper: log, decode, admission, body, event/return, exit.
 fn wrap_just_swap_v1<R:crate::idl_runtime::IdlRuntime,C:Admission<R>>(

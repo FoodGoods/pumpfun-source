@@ -24,22 +24,26 @@ pub enum Instruction {
 }
 // Takes a known IDL instruction name and its bytes AFTER the eight-byte selector.
 // Entrypoint selector/fallback/event-recursion dispatch is intentionally separate.
+pub mod wire;
+fn wire_args<T:borsh::BorshDeserialize>(bytes:&[u8])->R<T> {
+ T::deserialize(&mut &bytes[..]).map_err(|_|Error::Code(102))
+}
+fn wire_shares(v:Vec<wire::Share>)->Vec<Share>{v.into_iter().map(|s|Share{kind:match s.share_type{wire::ShareType::Beneficiary=>ShareKind::Beneficiary,wire::ShareType::Fee=>ShareKind::Fee,wire::ShareType::Tip=>ShareKind::Tip},authority:s.address.to_bytes(),bps:s.bps}).collect()}
 pub fn decode_arguments(name:&str,bytes:&[u8])->R<Instruction> {
- let mut r=Reader{rest:bytes,code:102};
- let v=match name {
- "donate_v1"=>Instruction::Donation(DonationVariant::TokenBytes,r.donation()?),
- "donate_pubkey_config_id_v1"=>Instruction::Donation(DonationVariant::TokenPubkey,r.donation()?),
- "donate_pubkey_config_id_with_payer_v1"=>Instruction::Donation(DonationVariant::TokenPubkeyWithPayer,r.donation()?),
- "donate_native_v1"=>Instruction::Donation(DonationVariant::NativeBytes,r.donation()?),
- "donate_native_pubkey_config_id_v1"=>Instruction::Donation(DonationVariant::NativePubkey,r.donation()?),
- "close_donation_epoch_v1"=>Instruction::Close(r.key()?,r.u128()?),
- "distribute_after_just_swapping_v1"=>Instruction::After(r.shares()?),
- "distribute_non_swap_output_mint_v1"=>Instruction::NonSwap(r.shares()?),
- "just_swap_v1"=>Instruction::JustSwap(r.bytes()?),
- "swap_then_distribute_v1"=>Instruction::Combined(r.bytes()?,r.shares()?),
- "upsert_mint_whitelist_v1"=>Instruction::Whitelist(r.keys()?),
+ Ok(match name {
+ "close_donation_epoch_v1"=>{let a:wire::CloseDonationEpochV1=wire_args(bytes)?;Instruction::Close(a.config_id,a.epoch)},
+ "distribute_after_just_swapping_v1"=>{let a:wire::DistributeAfterJustSwappingV1=wire_args(bytes)?;Instruction::After(wire_shares(a.shares))},
+ "distribute_non_swap_output_mint_v1"=>{let a:wire::DistributeNonSwapOutputMintV1=wire_args(bytes)?;Instruction::NonSwap(wire_shares(a.shares))},
+ "donate_native_pubkey_config_id_v1"=>{let a:wire::DonateNativePubkeyConfigIdV1=wire_args(bytes)?;Instruction::Donation(DonationVariant::NativePubkey,DonationArgs{amount:a.amount,config_id:a.config_id.to_bytes(),tip_bps:a.tip_bps,message:a.message,credited_to:a.credited_to.to_bytes()})},
+ "donate_native_v1"=>{let a:wire::DonateNativeV1=wire_args(bytes)?;Instruction::Donation(DonationVariant::NativeBytes,DonationArgs{amount:a.amount,config_id:a.config_id,tip_bps:a.tip_bps,message:a.message,credited_to:a.credited_to.to_bytes()})},
+ "donate_pubkey_config_id_v1"=>{let a:wire::DonatePubkeyConfigIdV1=wire_args(bytes)?;Instruction::Donation(DonationVariant::TokenPubkey,DonationArgs{amount:a.amount,config_id:a.config_id.to_bytes(),tip_bps:a.tip_bps,message:a.message,credited_to:a.credited_to.to_bytes()})},
+ "donate_pubkey_config_id_with_payer_v1"=>{let a:wire::DonatePubkeyConfigIdWithPayerV1=wire_args(bytes)?;Instruction::Donation(DonationVariant::TokenPubkeyWithPayer,DonationArgs{amount:a.amount,config_id:a.config_id.to_bytes(),tip_bps:a.tip_bps,message:a.message,credited_to:a.credited_to.to_bytes()})},
+ "donate_v1"=>{let a:wire::DonateV1=wire_args(bytes)?;Instruction::Donation(DonationVariant::TokenBytes,DonationArgs{amount:a.amount,config_id:a.config_id,tip_bps:a.tip_bps,message:a.message,credited_to:a.credited_to.to_bytes()})},
+ "just_swap_v1"=>{let a:wire::JustSwapV1=wire_args(bytes)?;Instruction::JustSwap(a.jupiter_swap_ix_data)},
+ "swap_then_distribute_v1"=>{let a:wire::SwapThenDistributeV1=wire_args(bytes)?;Instruction::Combined(a.jupiter_swap_ix_data,wire_shares(a.shares))},
+ "upsert_mint_whitelist_v1"=>{let a:wire::UpsertMintWhitelistV1=wire_args(bytes)?;Instruction::Whitelist(a.mints.into_iter().map(|p|p.to_bytes()).collect())},
  _=>return Err(Error::Incomplete("entrypoint fallback dispatch")),
- };Ok(v) // Suffix accepted. No max113 shares / max1MiB opaque data policy.
+ })
 }
 fn header<'a>(b:&'a [u8],disc:[u8;8],checked:bool)->R<Reader<'a>> {
  if checked {require(b.len()>=8,3001)?;require(b[..8]==disc,3002)?;} else {assert!(b.len()>=8,"unchecked state discriminator slice");}Ok(Reader{rest:&b[8..],code:3003})

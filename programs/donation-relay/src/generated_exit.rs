@@ -2,7 +2,7 @@
 //! The runtime trait contains AccountInfo primitives only, never an application exit.
 use crate::{Key, State, Tracker, Debouncer, Distribution, SwapReceipt, Whitelist, codec};
 use std::io::Write;
-#[path="bpf_writer.rs"] pub(crate) mod bpf_writer;
+pub(crate) mod bpf_writer { pub use anchor_lang::__private::BpfWriter; }
 use bpf_writer::BpfWriter;
 use codec::constants::{RELAY, WHITELIST_DISC, TRACKER_DISC, DEBOUNCER_DISC, DISTRIBUTION_DISC, RECEIPT_DISC};
 

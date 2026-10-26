@@ -14,10 +14,10 @@ pub type R<T> = Result<T, Error>;
 pub fn require(ok:bool,code:u32)->R<()> {if ok {Ok(())} else {Err(Error::Code(code))}}
 pub fn overflow()->Error {Error::Code(6008)}
 
-pub mod business_error_codes;
+pub mod business_error_codes; pub mod shared_donation; pub mod donation_handlers;
 
 anchor_lang::declare_id!("RLAYHr9TRFcKB2ubYQhspcnXiaGpaVzNQvHytt47RZu");
-mod anchor_framework {
+pub mod anchor_framework {
     use anchor_lang::prelude::*;
     use crate::ID;
     /*
@@ -36,36 +36,34 @@ mod anchor_framework {
     #[program]
     pub mod relay_anchor_idl_reconstruction_probe {
         use super::*;
-        pub fn donate_v1(mut ctx: Context<DonateV1>, amount:u64, config_id:[u8;32], tip_bps:u16, message:String, credited_to:Pubkey) -> Result<DonationMadeV1Event> {
-            let event=donation_body(&mut ctx,amount,config_id,tip_bps,message,credited_to)?;
-            emit!(event);
-            emit_cpi!(event);
-            Ok(event)
-        }
-        pub fn donate_pubkey_config_id_v1(mut ctx: Context<DonatePubkeyConfigIdV1>, amount:u64, config_id:Pubkey, tip_bps:u16, message:String, credited_to:Pubkey) -> Result<DonationMadeV1Event> {
-            let event=donation_body_pubkey(&mut ctx,amount,config_id.to_bytes(),tip_bps,message,credited_to)?;
-            emit!(event);
-            emit_cpi!(event);
-            Ok(event)
-        }
-        pub fn donate_pubkey_config_id_with_payer_v1(mut ctx: Context<DonatePubkeyConfigIdWithPayerV1>, amount:u64, config_id:Pubkey, tip_bps:u16, message:String, credited_to:Pubkey) -> Result<DonationMadeV1Event> {
-            let event=donation_body_payer(&mut ctx,amount,config_id.to_bytes(),tip_bps,message,credited_to)?;
-            emit!(event);
-            emit_cpi!(event);
-            Ok(event)
-        }
-        pub fn donate_native_v1(mut ctx: Context<DonateNativeV1>, amount:u64, config_id:[u8;32], tip_bps:u16, message:String, credited_to:Pubkey) -> Result<DonationMadeV1Event> {
-            anchor_lang::system_program::transfer(CpiContext::new(ctx.accounts.system_program.to_account_info(),anchor_lang::system_program::Transfer {from:ctx.accounts.from.to_account_info(),to:ctx.accounts.temp_wsol_token_account.to_account_info()}),amount)?;
-            anchor_spl::token_interface::sync_native(CpiContext::new(ctx.accounts.token_program.to_account_info(),anchor_spl::token_interface::SyncNative {account:ctx.accounts.temp_wsol_token_account.to_account_info()}))?;
-            let event=donation_body_native(&mut ctx,amount,config_id,tip_bps,message,credited_to)?;
-            anchor_spl::token_interface::close_account(CpiContext::new(ctx.accounts.token_program.to_account_info(),anchor_spl::token_interface::CloseAccount {account:ctx.accounts.temp_wsol_token_account.to_account_info(),destination:ctx.accounts.from.to_account_info(),authority:ctx.accounts.from.to_account_info()}))?;
+        pub fn donate_v1(ctx: Context<DonateV1>, amount:u64, config_id:[u8;32], tip_bps:u16, message:String, credited_to:Pubkey) -> Result<DonationMadeV1Event> {
+            let epoch_tracker_bump=ctx.bumps.epoch_tracker;
+            let debouncer_bump=ctx.bumps.debouncer;
+            let event=crate::donation_handlers::donate_v1_handler(ctx.accounts,crate::codec::wire::DonateV1 {amount,config_id,tip_bps,message,credited_to},epoch_tracker_bump,debouncer_bump)?;
             emit!(event);emit_cpi!(event);Ok(event)
         }
-        pub fn donate_native_pubkey_config_id_v1(mut ctx: Context<DonateNativePubkeyConfigIdV1>, amount:u64, config_id:Pubkey, tip_bps:u16, message:String, credited_to:Pubkey) -> Result<DonationMadeV1Event> {
-            anchor_lang::system_program::transfer(CpiContext::new(ctx.accounts.system_program.to_account_info(),anchor_lang::system_program::Transfer {from:ctx.accounts.from.to_account_info(),to:ctx.accounts.temp_wsol_token_account.to_account_info()}),amount)?;
-            anchor_spl::token_interface::sync_native(CpiContext::new(ctx.accounts.token_program.to_account_info(),anchor_spl::token_interface::SyncNative {account:ctx.accounts.temp_wsol_token_account.to_account_info()}))?;
-            let event=donation_body_native_pubkey(&mut ctx,amount,config_id.to_bytes(),tip_bps,message,credited_to)?;
-            anchor_spl::token_interface::close_account(CpiContext::new(ctx.accounts.token_program.to_account_info(),anchor_spl::token_interface::CloseAccount {account:ctx.accounts.temp_wsol_token_account.to_account_info(),destination:ctx.accounts.from.to_account_info(),authority:ctx.accounts.from.to_account_info()}))?;
+        pub fn donate_pubkey_config_id_v1(ctx: Context<DonatePubkeyConfigIdV1>, amount:u64, config_id:Pubkey, tip_bps:u16, message:String, credited_to:Pubkey) -> Result<DonationMadeV1Event> {
+            let epoch_tracker_bump=ctx.bumps.epoch_tracker;
+            let debouncer_bump=ctx.bumps.debouncer;
+            let event=crate::donation_handlers::donate_pubkey_config_id_v1_handler(ctx.accounts,crate::codec::wire::DonatePubkeyConfigIdV1 {amount,config_id,tip_bps,message,credited_to},epoch_tracker_bump,debouncer_bump)?;
+            emit!(event);emit_cpi!(event);Ok(event)
+        }
+        pub fn donate_pubkey_config_id_with_payer_v1(ctx: Context<DonatePubkeyConfigIdWithPayerV1>, amount:u64, config_id:Pubkey, tip_bps:u16, message:String, credited_to:Pubkey) -> Result<DonationMadeV1Event> {
+            let epoch_tracker_bump=ctx.bumps.epoch_tracker;
+            let debouncer_bump=ctx.bumps.debouncer;
+            let event=crate::donation_handlers::donate_pubkey_config_id_with_payer_v1_handler(ctx.accounts,crate::codec::wire::DonatePubkeyConfigIdWithPayerV1 {amount,config_id,tip_bps,message,credited_to},epoch_tracker_bump,debouncer_bump)?;
+            emit!(event);emit_cpi!(event);Ok(event)
+        }
+        pub fn donate_native_v1(ctx: Context<DonateNativeV1>, amount:u64, config_id:[u8;32], tip_bps:u16, message:String, credited_to:Pubkey) -> Result<DonationMadeV1Event> {
+            let epoch_tracker_bump=ctx.bumps.epoch_tracker;
+            let debouncer_bump=ctx.bumps.debouncer;
+            let event=crate::donation_handlers::donate_native_v1_handler(ctx.accounts,crate::codec::wire::DonateNativeV1 {amount,config_id,tip_bps,message,credited_to},epoch_tracker_bump,debouncer_bump)?;
+            emit!(event);emit_cpi!(event);Ok(event)
+        }
+        pub fn donate_native_pubkey_config_id_v1(ctx: Context<DonateNativePubkeyConfigIdV1>, amount:u64, config_id:Pubkey, tip_bps:u16, message:String, credited_to:Pubkey) -> Result<DonationMadeV1Event> {
+            let epoch_tracker_bump=ctx.bumps.epoch_tracker;
+            let debouncer_bump=ctx.bumps.debouncer;
+            let event=crate::donation_handlers::donate_native_pubkey_config_id_v1_handler(ctx.accounts,crate::codec::wire::DonateNativePubkeyConfigIdV1 {amount,config_id,tip_bps,message,credited_to},epoch_tracker_bump,debouncer_bump)?;
             emit!(event);emit_cpi!(event);Ok(event)
         }
         pub fn upsert_mint_whitelist_v1(ctx: Context<UpsertMintWhitelistV1>, mints: Vec<Pubkey>) -> Result<()> {

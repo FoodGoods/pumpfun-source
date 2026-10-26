@@ -23,8 +23,7 @@ fn donation_body(ctx:&mut Context<DonateV1>,amount:u64,config_id:[u8;32],tip_bps
  if owner.to_bytes()!=crate::codec::constants::TOKEN && owner.to_bytes()!=crate::codec::constants::TOKEN2022 {return Err(donation_error(Code::InvalidTokenProgram,None));}
  let mint=ctx.accounts.mint.key();
  if mint.to_bytes()!=crate::codec::constants::NATIVE && mint.to_bytes()!=crate::codec::constants::NATIVE2022 && !ctx.accounts.mint_whitelist.mints.contains(&mint) {
-  let info=ctx.accounts.mint.to_account_info();let data=info.data.borrow();
-  let safe=crate::mint_policy::safe_mint_data(&data,owner.to_bytes()==crate::codec::constants::TOKEN2022).map_err(|e|match e {crate::mint_policy::DecodeError::InvalidAccountData=>ProgramError::InvalidAccountData,crate::mint_policy::DecodeError::UninitializedAccount=>ProgramError::UninitializedAccount})?;
+  let safe=crate::mint_policy::typed_mint_safe(&ctx.accounts.mint.to_account_info())?;
   if !safe {return Err(donation_error(Code::MintNotSafeForDonation,Some(("programs/contracts/src/tools/checks.rs",184))));}
  }
  let tracker=&mut ctx.accounts.epoch_tracker;
@@ -61,8 +60,7 @@ fn donation_body_pubkey(ctx:&mut Context<DonatePubkeyConfigIdV1>,amount:u64,conf
  if owner.to_bytes()!=crate::codec::constants::TOKEN && owner.to_bytes()!=crate::codec::constants::TOKEN2022 {return Err(donation_error(Code::InvalidTokenProgram,None));}
  let mint=ctx.accounts.mint.key();
  if mint.to_bytes()!=crate::codec::constants::NATIVE && mint.to_bytes()!=crate::codec::constants::NATIVE2022 && !ctx.accounts.mint_whitelist.mints.contains(&mint) {
-  let info=ctx.accounts.mint.to_account_info();let data=info.data.borrow();
-  let safe=crate::mint_policy::safe_mint_data(&data,owner.to_bytes()==crate::codec::constants::TOKEN2022).map_err(|e|match e {crate::mint_policy::DecodeError::InvalidAccountData=>ProgramError::InvalidAccountData,crate::mint_policy::DecodeError::UninitializedAccount=>ProgramError::UninitializedAccount})?;
+  let safe=crate::mint_policy::typed_mint_safe(&ctx.accounts.mint.to_account_info())?;
   if !safe {return Err(donation_error(Code::MintNotSafeForDonation,Some(("programs/contracts/src/tools/checks.rs",184))));}
  }
  let tracker=&mut ctx.accounts.epoch_tracker;
@@ -99,8 +97,7 @@ fn donation_body_payer(ctx:&mut Context<DonatePubkeyConfigIdWithPayerV1>,amount:
  if owner.to_bytes()!=crate::codec::constants::TOKEN && owner.to_bytes()!=crate::codec::constants::TOKEN2022 {return Err(donation_error(Code::InvalidTokenProgram,None));}
  let mint=ctx.accounts.mint.key();
  if mint.to_bytes()!=crate::codec::constants::NATIVE && mint.to_bytes()!=crate::codec::constants::NATIVE2022 && !ctx.accounts.mint_whitelist.mints.contains(&mint) {
-  let info=ctx.accounts.mint.to_account_info();let data=info.data.borrow();
-  let safe=crate::mint_policy::safe_mint_data(&data,owner.to_bytes()==crate::codec::constants::TOKEN2022).map_err(|e|match e {crate::mint_policy::DecodeError::InvalidAccountData=>ProgramError::InvalidAccountData,crate::mint_policy::DecodeError::UninitializedAccount=>ProgramError::UninitializedAccount})?;
+  let safe=crate::mint_policy::typed_mint_safe(&ctx.accounts.mint.to_account_info())?;
   if !safe {return Err(donation_error(Code::MintNotSafeForDonation,Some(("programs/contracts/src/tools/checks.rs",184))));}
  }
  let tracker=&mut ctx.accounts.epoch_tracker;
@@ -137,8 +134,7 @@ fn donation_body_native(ctx:&mut Context<DonateNativeV1>,amount:u64,config_id:[u
  if owner.to_bytes()!=crate::codec::constants::TOKEN && owner.to_bytes()!=crate::codec::constants::TOKEN2022 {return Err(donation_error(Code::InvalidTokenProgram,None));}
  let mint=ctx.accounts.mint.key();
  if mint.to_bytes()!=crate::codec::constants::NATIVE && mint.to_bytes()!=crate::codec::constants::NATIVE2022 && !ctx.accounts.mint_whitelist.mints.contains(&mint) {
-  let info=ctx.accounts.mint.to_account_info();let data=info.data.borrow();
-  let safe=crate::mint_policy::safe_mint_data(&data,owner.to_bytes()==crate::codec::constants::TOKEN2022).map_err(|e|match e {crate::mint_policy::DecodeError::InvalidAccountData=>ProgramError::InvalidAccountData,crate::mint_policy::DecodeError::UninitializedAccount=>ProgramError::UninitializedAccount})?;
+  let safe=crate::mint_policy::typed_mint_safe(&ctx.accounts.mint.to_account_info())?;
   if !safe {return Err(donation_error(Code::MintNotSafeForDonation,Some(("programs/contracts/src/tools/checks.rs",184))));}
  }
  let tracker=&mut ctx.accounts.epoch_tracker;
@@ -175,8 +171,7 @@ fn donation_body_native_pubkey(ctx:&mut Context<DonateNativePubkeyConfigIdV1>,am
  if owner.to_bytes()!=crate::codec::constants::TOKEN && owner.to_bytes()!=crate::codec::constants::TOKEN2022 {return Err(donation_error(Code::InvalidTokenProgram,None));}
  let mint=ctx.accounts.mint.key();
  if mint.to_bytes()!=crate::codec::constants::NATIVE && mint.to_bytes()!=crate::codec::constants::NATIVE2022 && !ctx.accounts.mint_whitelist.mints.contains(&mint) {
-  let info=ctx.accounts.mint.to_account_info();let data=info.data.borrow();
-  let safe=crate::mint_policy::safe_mint_data(&data,owner.to_bytes()==crate::codec::constants::TOKEN2022).map_err(|e|match e {crate::mint_policy::DecodeError::InvalidAccountData=>ProgramError::InvalidAccountData,crate::mint_policy::DecodeError::UninitializedAccount=>ProgramError::UninitializedAccount})?;
+  let safe=crate::mint_policy::typed_mint_safe(&ctx.accounts.mint.to_account_info())?;
   if !safe {return Err(donation_error(Code::MintNotSafeForDonation,Some(("programs/contracts/src/tools/checks.rs",184))));}
  }
  let tracker=&mut ctx.accounts.epoch_tracker;
@@ -218,3 +213,4 @@ fn native_mint_pair(mint:&Pubkey,program:&Pubkey)->bool {
 }
 include!("instructions/v1/public_api/donate/donate_native.rs");
 include!("instructions/v1/public_api/donate/donate_native_pubkey_config_id.rs");
+
